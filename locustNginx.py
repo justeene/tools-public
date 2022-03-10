@@ -4,11 +4,10 @@ pip3 install -i https://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.al
 运行: locust
 输入：用户数，加速度，host就会开始测试
 '''
-from locust import FastHttpUser, task
+from locust import HttpUser, task
 
 
-class LocustTest(FastHttpUser):
+class LocustTest(HttpUser):
     @task
     def nginxCall(self):
-        # self.client.get('http://139.180.204.36/poweredby.png')
-        self.client.get('/')
+        self.client.get('http://139.180.204.36/poweredby.png')
