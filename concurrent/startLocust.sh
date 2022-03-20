@@ -14,9 +14,9 @@ ln -s /usr/local/python3/bin/locust /usr/bin/locust
 systemctl stop firewalld.service
 systemctl disable firewalld.service
 sudo echo "
-root soft core 102400
-root hard core 102400" >>/etc/security/limits.conf
-ulimit -n 102400
+root soft core 10240000
+root hard core 10240000" >> /etc/security/limits.conf
+ulimit -n 10240000
 wget https://raw.githubusercontent.com/justeene/tools-public/main/concurrent/locustNginx.py
 locust -f locustNginx.py --web-host 0.0.0.0
 #设置总数和速率
