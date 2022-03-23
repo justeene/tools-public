@@ -1,4 +1,5 @@
 #!/bin/bash -e
+#test
 echo "
 vm.swappiness = 0
 net.ipv4.neigh.default.gc_stale_time=120
@@ -62,72 +63,17 @@ root soft nofile 4096000
 root hard nofile 4096000
 " >>/etc/security/limits.conf
 ulimit -n 1024000
-
-yum install nginx -y
-
-echo "
-user nginx;
-worker_processes 4;
-pid /run/nginx.pid;
-
-events{
-    use epoll;
-    worker_connections 409600;
-    multi_accept on;
-    accept_mutex off;
-}
-
-http {
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-    open_file_cache max=200000 inactive=200s;
-    open_file_cache_valid 300s;
-    open_file_cache_min_uses 2;
-    keepalive_timeout 5;
-    keepalive_requests 20000000;
-    client_header_timeout 5;
-    client_body_timeout 5;
-    reset_timedout_connection on;
-    send_timeout 5;
-
-    #日志
-    access_log off;
-    gzip off;
-
-    server {
-        listen       80;
-        listen       [::]:80;
-        server_name  _;
-        root         /usr/share/nginx/html;
-        error_page 404 /404.html;
-        location = /404.html {
-        }
-
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-        }
-    }
-
-}
-" > /etc/nginx/nginx.conf
-
-service nginx restart
-echo "a" > /usr/share/nginx/html/a.html
-
-systemctl stop firewalld.service
-
-
-#test
 yum install git unzip -y
 git clone https://github.com/wg/wrk.git
 yum group install "Development Tools" -y
 cd wrk  
 make
+host="127.0.0.1:80"
+#只要带宽够，本机和公网无太大区别
 #88thread 20seconds keep 10000 connections open
 #1vcpu=7w  4vcpu=22w 8vcpu=35w
-./wrk -t88 -c10000 -d30s "http://127.0.0.1:80/a.html"
-#          4vcpu=39w 8vcpu=62w
-./wrk -t300 -c50000 -d30s "http://127.0.0.1:80/a.html"
+./wrk -t88 -c10000 -d30s "http://${host}/a.html"
+#1vcpu=42w(纯) 4vcpu=39w 8vcpu=62w
+./wrk -t300 -c50000 -d30s "http://${host}/a.html"
 #1vcpu=13w 4vcpu=56w 8vcpu=104w
-./wrk -t500 -c100000 -d30s "http://127.0.0.1:80/a.html"
+./wrk -t500 -c100000 -d30s "http://${host}/a.html"
